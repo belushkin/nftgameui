@@ -13,7 +13,7 @@ import LoadingIndicator from "./Components/LoadingIndicator";
 import { ethers } from "ethers";
 
 // Constants
-const TWITTER_HANDLE = "_buildspace";
+const TWITTER_HANDLE = "belushkin";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
 const checkNetwork = async () => {
