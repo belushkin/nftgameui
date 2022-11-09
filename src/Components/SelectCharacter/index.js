@@ -14,7 +14,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
   const [mintingCharacter, setMintingCharacter] = useState(false);
 
   // Actions
-  const mintCharacterNFTAction = (characterId) => async () => {
+  const mintCharacterNFTAction = async (characterId) => {
     try {
       if (gameContract) {
         /*
