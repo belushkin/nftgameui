@@ -7,6 +7,8 @@ import SelectCharacter from "./Components/SelectCharacter";
 import { CONTRACT_ADDRESS, transformCharacterData } from "./constants";
 
 import myEpicGame from "./utils/MyEpicGame.json";
+import Arena from "./Components/Arena";
+import LoadingIndicator from "./Components/LoadingIndicator";
 
 import { ethers } from "ethers";
 
@@ -33,6 +35,8 @@ const App = () => {
    */
   const [characterNFT, setCharacterNFT] = useState(null);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   // Actions
   const checkIfWalletIsConnected = async () => {
     try {
@@ -40,6 +44,10 @@ const App = () => {
 
       if (!ethereum) {
         console.log("Make sure you have MetaMask!");
+        /*
+         * We set isLoading here because we use return in the next line
+         */
+        setIsLoading(false);
         return;
       } else {
         console.log("We have the ethereum object", ethereum);
@@ -57,13 +65,20 @@ const App = () => {
     } catch (error) {
       console.log(error);
     }
+    /*
+     * We release the state property after all the function logic
+     */
+    setIsLoading(false);
   };
 
-  // Render Methods
   const renderContent = () => {
     /*
-     * Scenario #1
+     * If the app is currently loading, just render out LoadingIndicator
      */
+    if (isLoading) {
+      return <LoadingIndicator />;
+    }
+
     if (!currentAccount) {
       return (
         <div className="connect-wallet-container">
@@ -79,11 +94,16 @@ const App = () => {
           </button>
         </div>
       );
-      /*
-       * Scenario #2
-       */
     } else if (currentAccount && !characterNFT) {
       return <SelectCharacter setCharacterNFT={setCharacterNFT} />;
+    } else if (currentAccount && characterNFT) {
+      return (
+        <Arena
+          characterNFT={characterNFT}
+          setCharacterNFT={setCharacterNFT}
+          currentAccount={currentAccount}
+        />
+      );
     }
   };
 
@@ -117,16 +137,11 @@ const App = () => {
   };
 
   useEffect(() => {
+    setIsLoading(true);
     checkIfWalletIsConnected();
   }, []);
 
-  /*
-   * Add this useEffect right under the other useEffect where you are calling checkIfWalletIsConnected
-   */
   useEffect(() => {
-    /*
-     * The function we will call that interacts with our smart contract
-     */
     const fetchNFTMetadata = async () => {
       console.log("Checking for Character NFT on address:", currentAccount);
 
@@ -138,18 +153,18 @@ const App = () => {
         signer
       );
 
-      const txn = await gameContract.checkIfUserHasNFT();
-      if (txn.name) {
+      const characterNFT = await gameContract.checkIfUserHasNFT();
+      if (characterNFT.name) {
         console.log("User has character NFT");
-        setCharacterNFT(transformCharacterData(txn));
-      } else {
-        console.log("No character NFT found");
+        setCharacterNFT(transformCharacterData(characterNFT));
       }
+
+      /*
+       * Once we are done with all the fetching, set loading state to false
+       */
+      setIsLoading(false);
     };
 
-    /*
-     * We only want to run this, if we have a connected wallet
-     */
     if (currentAccount) {
       console.log("CurrentAccount:", currentAccount);
       fetchNFTMetadata();
