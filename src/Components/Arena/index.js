@@ -20,18 +20,10 @@ const Arena = ({ characterNFT, setCharacterNFT, currentAccount }) => {
       if (gameContract) {
         setAttackState("attacking");
         console.log("Attacking boss...");
-        const txn = await gameContract.attackBoss();
-        await txn.wait();
-        console.log(txn);
+        const attackTxn = await gameContract.attackBoss();
+        await attackTxn.wait();
+        console.log("attackTxn:", attackTxn);
         setAttackState("hit");
-
-        /*
-         * Set your toast state to true and then false 5 seconds later
-         */
-        setShowToast(true);
-        setTimeout(() => {
-          setShowToast(false);
-        }, 5000);
       }
     } catch (error) {
       console.error("Error attacking boss:", error);
